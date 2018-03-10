@@ -26,9 +26,11 @@ INSTALLDIR=""
 
 TMPRUNSCRIPT=""
 
+TMPSUEXEC=""
+
 PATHARRAY=()
 
-export PATHARRAY NOWHICH DOWNLOADURL DOWNLOADGITSCRIPT DLAGENT TMPAGENT TMPDLFILE TMPHFSFILE P7ZUTIL SUDOCMD HFSSUPPORT TMPMNTDIR INSTALLDIR TMPRUNSCRIPT
+export PATHARRAY NOWHICH DOWNLOADURL DOWNLOADGITSCRIPT DLAGENT TMPAGENT TMPDLFILE TMPHFSFILE P7ZUTIL SUDOCMD HFSSUPPORT TMPMNTDIR INSTALLDIR TMPRUNSCRIPT TMPSUEXEC
 
 
 function exit_app {
@@ -48,8 +50,10 @@ function exit_app {
 	if [ -n "${TMPRUNSCRIPT}" -a -e "${TMPRUNSCRIPT}" ]; then
 		rm -vf "${TMPRUNSCRIPT}"
 	fi
-	
-	unset PATHARRAY NOWHICH DOWNLOADURL DOWNLOADGITSCRIPT DLAGENT TMPAGENT TMPDLFILE TMPHFSFILE P7ZUTIL SUDOCMD HFSSUPPORT TMPMNTDIR INSTALLDIR TMPRUNSCRIPT
+	if [ -n "${TMPSUEXEC}" -a -e "${TMPSUEXEC}" ]; then	
+		rm -vf "${TMPSUEXEC}"
+	fi
+	unset PATHARRAY NOWHICH DOWNLOADURL DOWNLOADGITSCRIPT DLAGENT TMPAGENT TMPDLFILE TMPHFSFILE P7ZUTIL SUDOCMD HFSSUPPORT TMPMNTDIR INSTALLDIR TMPRUNSCRIPT TMPSUEXEC
 }
 
 trap exit_app SIGINT SIGTERM SIGKILL SIGABRT SIGSEGV SIGQUIT
@@ -381,10 +385,6 @@ fi
 
 TMPMNTDIR=`create_tmpdir`
 
-get_sudo
-
-mount_hfs_img "${TMPHFSFILE}" "${TMPMNTDIR}"
-
 INSTALLDIR=`get_install_dir`
 
 TMPRUNSCRIPT=`${TMPAGENT} --suffix=".runscript"`
@@ -399,26 +399,59 @@ else
 	curl --progress-bar --output ${TMPRUNSCRIPT} --url "${DOWNLOADGITSCRIPT}"
 fi
 
-run_sudo "`which mkdir` -v -m 755 ${INSTALLDIR}/cnlabSpeedTest ${INSTALLDIR}/cnlabSpeedTest/icons ${INSTALLDIR}/cnlabSpeedTest/logs"
-run_sudo "`which cp` -R --no-preserve=mode ${TMPMNTDIR}/cnlabSpeedTest.app ${INSTALLDIR}/cnlabSpeedTest/"
+TMPSUEXEC=`${TMPAGENT} --suffix=".suexec"`
 
-run_sudo "`which icns2png` -x -d 32 -o ${INSTALLDIR}/cnlabSpeedTest/icons/ ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/Resources/cnlabSpeedTest.icns"
+echo "#!/bin/bash" >> ${TMPSUEXEC}
 
-run_sudo "`which mv` ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/Java/* ${INSTALLDIR}/cnlabSpeedTest/"
+get_sudo
 
-run_sudo "`which mv` ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/PlugIns/Java.runtime/Contents/Home/jre/lib/security ${INSTALLDIR}/cnlabSpeedTest/"
+mount_hfs_img "${TMPHFSFILE}" "${TMPMNTDIR}"
 
-run_sudo "`which rm` -rf ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app"
+echo "`which mkdir` -v -m 755 ${INSTALLDIR}/cnlabSpeedTest ${INSTALLDIR}/cnlabSpeedTest/icons ${INSTALLDIR}/cnlabSpeedTest/logs" >> ${TMPSUEXEC}
+echo "`which cp` -R --no-preserve=mode ${TMPMNTDIR}/cnlabSpeedTest.app ${INSTALLDIR}/cnlabSpeedTest/" >> ${TMPSUEXEC}
 
-run_sudo "`which cp` ${TMPRUNSCRIPT} ${INSTALLDIR}/cnlabSpeedTest/run.sh"
-
-run_sudo "`which chmod` 755 ${INSTALLDIR}/cnlabSpeedTest/run.sh"
-
-run_sudo "`which ln` -sv ${INSTALLDIR}/cnlabSpeedTest/run.sh /usr/bin/cnlabSpeedTest"
+echo "`which icns2png` -x -d 32 -o ${INSTALLDIR}/cnlabSpeedTest/icons/ ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/Resources/cnlabSpeedTest.icns" >> ${TMPSUEXEC}
 
 if [ -d "/usr/share/pixmaps" ]; then
-STDICON="`find ${INSTALLDIR}/cnlabSpeedTest/icons | grep 256`"
-if [ -n "${STDICON}" ]; then
-  run_sudo "`which ln` -sv ${STDICON} /usr/share/pixmaps/cnlabSpeedTest.png"
+echo "STDICON=\"\`find ${INSTALLDIR}/cnlabSpeedTest/icons | grep 256\`\"" >> ${TMPSUEXEC}
+echo "if [ -n \"\${STDICON}\" ]; then" >> ${TMPSUEXEC}
+echo "`which ln` -sv \${STDICON} /usr/share/pixmaps/cnlabSpeedTest.png" >> ${TMPSUEXEC}
+echo "fi" >> ${TMPSUEXEC}
 fi
-fi
+
+echo "`which mv` ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/Java/* ${INSTALLDIR}/cnlabSpeedTest/" >> ${TMPSUEXEC}
+
+echo "`which mv` ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app/Contents/PlugIns/Java.runtime/Contents/Home/jre/lib/security ${INSTALLDIR}/cnlabSpeedTest/" >> ${TMPSUEXEC}
+
+echo "`which rm` -rf ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app" >> ${TMPSUEXEC}
+
+echo "`which cp` ${TMPRUNSCRIPT} ${INSTALLDIR}/cnlabSpeedTest/run.sh" >> ${TMPSUEXEC}
+
+echo "`which chmod` +755 ${INSTALLDIR}/cnlabSpeedTest/run.sh" >> ${TMPSUEXEC}
+
+echo "`which ln` -sv ${INSTALLDIR}/cnlabSpeedTest/run.sh /usr/bin/cnlabSpeedTest" >> ${TMPSUEXEC}
+
+echo "echo \"[Desktop Entry]\" > ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Name=cnlabSpeedTest\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Version=1.0\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"GenericName=cnlab Performance Test\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"GenericName[de]=cnlab Internet Performance-Messung\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Comment=Internet Speedcheck\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Exec=cnlabSpeedTest\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Icon=/usr/share/pixmaps/cnlabSpeedTest.png\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Terminal=false\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Categories=Network;System;Java;Monitor;\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Path=${INSTALLDIR}/cnlabSpeedTest\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"TryExec=/usr/bin/cnlabSpeedTest\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+echo "echo \"Type=Application\" >> ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+
+echo "`which chmod` 755 ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+
+echo "`which desktop-file-install` --delete-original ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.desktop" >> ${TMPSUEXEC}
+
+chmod +x ${TMPSUEXEC}
+
+run_sudo ${TMPSUEXEC}
+
+exit_app
+exit 0
