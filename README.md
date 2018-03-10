@@ -15,7 +15,7 @@ To take the pain out of scraping up all the bits needed to run the SpeedTest on 
 In order to install the SpeedTest program the easiest way is to download the `cnlabSpeedTestLinux-Setup.sh` Script ***only*** (the second Script, the launcher (`cnlabSpeedTest-Linux.sh`) is automatically downloaded by the Setup-Script during installation.
 
 Run the Setup-Script by opening a Terminal Application (on most Linux Distributions this can easily be achieved by pressing `Ctrl` + `Alt` + `T` ).
-Next cd into the Directory, where the Script has been downloaded to, e.g. `~/Downloads` and make the script executable by typing
+Next change into the working Directory (`cd`) where the Script has been downloaded to, e.g. `~/Downloads` and make the script executable by typing
 
 `chmod u+x cnlabSpeedTestLinux-Setup.sh`
 
@@ -26,6 +26,6 @@ Launch the installation routine by typing
 
 After the script has terminated successfully, you can safely delete the Setup-Script from your Computer, it is no longer needed.
 
-## Questions? Diffuculties? Errors?
+## Questions? Difficulties? Errors?
 
 Please have a look at the FAQs in the [Wiki](https://github.com/tobiasvogel/cnlabSpeedTestLinux/wiki).
