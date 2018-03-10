@@ -108,6 +108,27 @@ check_depends nslookup
 check_java
 echo "------"
 
-/usr/bin/java -Xms256m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Djavax.net.ssl.keyStore=${APPDIR}/security/cacerts -Xbootclasspath/p:libs/fontawesomefx-8.9.jar:libs/jackson-all-1.9.11.jar:libs/log4j-api-2.2.jar:libs/log4j-core-2.2.jar:libs/okhttp-3.2.0.jar:libs/okio-1.6.0.jar:libs/simple-xml-2.7.jar:libs/speedTestLib.jar:libs/sqlite-jdbc-3.8.7.jar -cp ${APPDIR}:${APPDIR}/libs:${APPDIR}/security:${APPDIR}/HSIPerformanceAppletFX-1.5.0.jar ch.cnlab.performanceapplet.fx.Main
+
+
+
+## Check Libraries (version)
+
+
+cd ${APPDIR}
+
+
+FONTAWESOME=`find libs/ -iname fontawesome*jar`
+JACKSONALL=`find libs/ -iname jackson-all*jar`
+LOG4JAPI=`find libs/ -iname log4j-api*jar`
+LOG4JCORE=`find libs/ -iname log4j-core*jar`
+OKHTTP=`find libs/ -iname okhttp*jar`
+OKIO=`find libs/ -iname okio*jar`
+SIMPLEXML=`find libs/ -iname simple-xml*jar`
+SPEEDTESTLIB=`find libs/ -iname speedTestLib*jar`
+SQLITEJDBC=`find libs/ -iname sqlite-jdbc*jar`
+HSIPERFORMANCEAPPLET=`basename $(find . -iname HSIPerformanceAppletFX*jar)`
+
+
+/usr/bin/java -Xms256m -Xmx1024m -Djava.net.preferIPv4Stack=true -Djavax.net.ssl.keyStore=${APPDIR}/security/cacerts -Xbootclasspath/p:${FONTAWESOME}:${JACKSONALL}:${LOG4JAPI}:${LOG4JCORE}:${OKHTTP}:${OKIO}:${SIMPLEXML}:${SPEEDTESTLIB}:${SQLITEJDBC} -cp ${APPDIR}:${APPDIR}/libs:${APPDIR}/security:${APPDIR}/${HSIPERFORMANCEAPPLET} ch.cnlab.performanceapplet.fx.Main
 
 exit 0
