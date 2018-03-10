@@ -394,9 +394,9 @@ echo "Downloading Launch-Script from \"${DOWNLOADGITSCRIPT}\" to temporary locat
 echo ""
 
 if [ "${DLAGENT}" == "wget" ]; then
-	wget --no-verbose --show-progress --output-document=${TMPDLFILE} "${DOWNLOADGITSCRIPT}"
+	wget --no-verbose --show-progress --output-document=${TMPRUNSCRIPT} "${DOWNLOADGITSCRIPT}"
 else
-	curl --progress-bar --output ${TMPDLFILE} --url "${DOWNLOADGITSCRIPT}"
+	curl --progress-bar --output ${TMPRUNSCRIPT} --url "${DOWNLOADGITSCRIPT}"
 fi
 
 run_sudo "`which mkdir` -v -m 755 ${INSTALLDIR}/cnlabSpeedTest ${INSTALLDIR}/cnlabSpeedTest/icons ${INSTALLDIR}/cnlabSpeedTest/logs"
@@ -412,7 +412,7 @@ run_sudo "`which rm` -rf ${INSTALLDIR}/cnlabSpeedTest/cnlabSpeedTest.app"
 
 run_sudo "`which cp` ${TMPRUNSCRIPT} ${INSTALLDIR}/cnlabSpeedTest/run.sh"
 
-run_sudp "`which chmod` +x ${INSTALLDIR}/cnlabSpeedTest/run.sh"
+run_sudo "`which chmod` 755 ${INSTALLDIR}/cnlabSpeedTest/run.sh"
 
 run_sudo "`which ln` -sv ${INSTALLDIR}/cnlabSpeedTest/run.sh /usr/bin/cnlabSpeedTest"
 
