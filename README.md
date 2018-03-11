@@ -2,7 +2,7 @@
 
 Scripts for downloading / installing and running the popular Connection-Speedtest under Linux.
 
-***Please note that I am not affiliated with the cnlab in any way. The SpeedTest Performance Software is their copyrighted Product and may not be redistributed freely. The Scripts provided here are simple wrappers that make the Software installable and executable on Linux Platforms.***
+***Please note that I am not affiliated with cnlab in any way. The SpeedTest Performance Software is their copyrighted Product and may not be redistributed freely. The Scripts provided here are simple wrappers that make the Software installable and executable on Linux Platforms.***
 
 ## Quick Introduction
 
